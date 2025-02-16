@@ -1,4 +1,20 @@
+import { useState, ChangeEvent, FocusEvent } from "react";
 import styled from "styled-components";
+
+interface FormField {
+  value: string;
+  id: string;
+  name: string;
+  type: string;
+  placeholder: string;
+  isValid?: boolean;
+  validation?: (value: string) => boolean;
+  message?: string;
+}
+
+interface FormData {
+  [key: string]: FormField;
+}
 
 const FormTestContainer = styled.section`
   width: 40%;
@@ -30,9 +46,8 @@ const FormContent = styled.form`
     text-align: center;
 
     @media (max-width: 440px) {
-    font-size: 26px;
-    
-}
+      font-size: 26px;
+    }
   }
 `;
 
@@ -57,13 +72,13 @@ const InputContainer = styled.div`
     color: #737d8f;
 
     @media (max-width: 440px) {
-    font-size: 14px;
-}
+      font-size: 14px;
+    }
   }
 `;
 
 const CtaButton = styled.button`
-  font-family: 'Poppins';
+  font-family: "Poppins";
   margin-top: 20px;
   padding: 15px 10px;
   font-size: 2vmin;
@@ -78,48 +93,115 @@ const CtaButton = styled.button`
 
   @media (max-width: 440px) {
     font-size: 16px;
-}
+  }
+`;
+
+const StyledInput = styled.input<{ isValid: boolean }>`
+  border: 2px solid ${(props) => (props.isValid ? "#737d8f" : "red")} !important;
+  background-color: ${(props) =>
+    props.isValid ? "white" : "#ffe6e6"} !important;
+`;
+
+const ErrorMessage = styled.span`
+  color: red;
+  font-size: 12px;
+  margin-top: 4px;
 `;
 
 const FormTest = () => {
+  const [formData, setFormData] = useState<FormData>({
+    name: {
+      value: "",
+      id: "name",
+      name: "name",
+      type: "text",
+      placeholder: "Nome Sobrenome",
+    },
+    email: {
+      value: "",
+      id: "email",
+      name: "email",
+      type: "text",
+      placeholder: "nome@email.com",
+      isValid: true,
+      validation: function (value: string) {
+        return /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/.test(
+          value.toLowerCase()
+        );
+      },
+      message: "Favor informar um email válido",
+    },
+    especiality: {
+      value: "",
+      id: "especiality",
+      name: "especiality",
+      type: "text",
+      placeholder: "Especialidade Médica",
+    },
+  });
+
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: {
+        ...prev[name],
+        value,
+      },
+    }));
+  };
+
+  const handleInputBlur = (e: FocusEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => {
+      const updatedField = {
+        ...prev[name],
+        isValid: name === "email" ? prev[name].validation!(value) : true,
+      };
+      return { ...prev, [name]: updatedField };
+    });
+  };
+
   return (
-    <>
-      <FormTestContainer>
-        <FormContent>
-          <h3>Cadastre-se para testar</h3>
+    <FormTestContainer>
+      <FormContent>
+        <h3>Cadastre-se para testar</h3>
 
-          <InputContainer>
-            <label>Nome</label>
-            <input
-              type="text"
-              name="name"
-              id="name"
-              placeholder="Nome Sobrenome"
-            />
-          </InputContainer>
-          <InputContainer>
-            <label>Email</label>
-            <input
-              type="text"
-              name="email"
-              id="email"
-              placeholder="nome@email.com"
-            />
-          </InputContainer>
-          <InputContainer>
-            <label>Especialidade Médica</label>
-            <input
-              type="text"
-              name="especiality"
-              id="especiality"
-              placeholder="Especialidade Médica"
-            />
-          </InputContainer>
+        <InputContainer>
+          <label>Nome</label>
+          <input
+            {...formData.name}
+            onChange={handleInputChange}
+            value={formData.name.value}
+          />
+        </InputContainer>
 
-          <CtaButton>Solicitar</CtaButton>
-        </FormContent>
-      </FormTestContainer>
-    </>
+        <InputContainer>
+          <label>Email</label>
+          <StyledInput
+            {...formData.email}
+            onChange={handleInputChange}
+            onBlur={handleInputBlur}
+            value={formData.email.value}
+            isValid={formData.email.isValid!}
+          />
+          {!formData.email.isValid && (
+            <ErrorMessage>{formData.email.message}</ErrorMessage>
+          )}
+        </InputContainer>
+
+        <InputContainer>
+          <label>Especialidade Médica</label>
+          <input
+            {...formData.especiality}
+            onChange={handleInputChange}
+            value={formData.especiality.value}
+          />
+        </InputContainer>
+
+        <CtaButton>Solicitar</CtaButton>
+      </FormContent>
+    </FormTestContainer>
   );
 };
 
