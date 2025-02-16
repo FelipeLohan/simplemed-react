@@ -61,7 +61,7 @@ const HeroBanner = () => {
     <>
       <HeroBannerContainer>
         <HeroTextContainer>
-          <h1>A solução inteligente para <br/> médicos organizarem <br/>seus atendimentos.</h1>
+          <h1>A solução inteligente para médicos organizarem <br/>seus atendimentos.</h1>
           <h2>Simplifique sua rotina, economize tempo e garanta a <br/> segurança dos dados de seus pacientes.</h2>
           <CtaButton>Teste Agora</CtaButton>
         </HeroTextContainer>
