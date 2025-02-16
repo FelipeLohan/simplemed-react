@@ -1,6 +1,20 @@
-import { useState } from "react";
+import { useState, ChangeEvent, FocusEvent } from "react";
 import styled from "styled-components";
-import * as forms from "../../utils/forms.ts";
+
+interface FormField {
+  value: string;
+  id: string;
+  name: string;
+  type: string;
+  placeholder: string;
+  isValid?: boolean;
+  validation?: (value: string) => boolean;
+  message?: string;
+}
+
+interface FormData {
+  [key: string]: FormField;
+}
 
 const FormTestContainer = styled.section`
   width: 40%;
@@ -82,8 +96,20 @@ const CtaButton = styled.button`
   }
 `;
 
+const StyledInput = styled.input<{ isValid: boolean }>`
+  border: 2px solid ${(props) => (props.isValid ? "#737d8f" : "red")} !important;
+  background-color: ${(props) =>
+    props.isValid ? "white" : "#ffe6e6"} !important;
+`;
+
+const ErrorMessage = styled.span`
+  color: red;
+  font-size: 12px;
+  margin-top: 4px;
+`;
+
 const FormTest = () => {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     name: {
       value: "",
       id: "name",
@@ -98,7 +124,7 @@ const FormTest = () => {
       type: "text",
       placeholder: "nome@email.com",
       isValid: true,
-      validation: function (value) {
+      validation: function (value: string) {
         return /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/.test(
           value.toLowerCase()
         );
@@ -114,7 +140,7 @@ const FormTest = () => {
     },
   });
 
-  function handleInputChange(e) {
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
@@ -123,18 +149,18 @@ const FormTest = () => {
         value,
       },
     }));
-  }
+  };
 
-  function handleInputBlur(e) {
+  const handleInputBlur = (e: FocusEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => {
       const updatedField = {
         ...prev[name],
-        isValid: name === "email" ? prev[name].validation(value) : true,
+        isValid: name === "email" ? prev[name].validation!(value) : true,
       };
       return { ...prev, [name]: updatedField };
     });
-  }
+  };
 
   return (
     <FormTestContainer>
@@ -157,7 +183,7 @@ const FormTest = () => {
             onChange={handleInputChange}
             onBlur={handleInputBlur}
             value={formData.email.value}
-            isValid={formData.email.isValid}
+            isValid={formData.email.isValid!}
           />
           {!formData.email.isValid && (
             <ErrorMessage>{formData.email.message}</ErrorMessage>
@@ -178,18 +204,5 @@ const FormTest = () => {
     </FormTestContainer>
   );
 };
-
-const StyledInput = styled.input<{ isValid: boolean }>`
-  border: 2px solid ${(props) => (props.isValid ? "#737d8f" : "red")} !important;
-  background-color: ${(props) =>
-    props.isValid ? "white" : "#ffe6e6"} !important;
-`;
-
-
-const ErrorMessage = styled.span`
-  color: red;
-  font-size: 12px;
-  margin-top: 4px;
-`;
 
 export { FormTest };
